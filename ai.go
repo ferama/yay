@@ -21,7 +21,7 @@ func newAI() *AI {
 	return ai
 }
 
-func (a *AI) ask(content string) (string, error) {
+func (a *AI) sendMsg(content string) (string, error) {
 	a.messages = append(a.messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: content,

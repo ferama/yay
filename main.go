@@ -58,7 +58,7 @@ type model struct {
 func initialModel() model {
 
 	ti := textinput.New()
-	ti.Placeholder = "Ask"
+	ti.Placeholder = "Send a msg"
 	ti.Focus()
 	ti.CharLimit = 1000
 	ti.Width = 60
@@ -110,7 +110,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			m.requesting = true
 			cmd = func() tea.Msg {
-				res, err := m.ai.ask(value)
+				res, err := m.ai.sendMsg(value)
 				if err != nil {
 					return err
 				}
@@ -143,7 +143,7 @@ func (m model) View() string {
 	}
 
 	return fmt.Sprintf(
-		"\n%s%s\n\n%s",
+		"\n%s%s\n%s",
 		spin,
 		m.textInput.View(),
 		"(esc to quit)",
