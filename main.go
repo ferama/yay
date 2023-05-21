@@ -6,11 +6,28 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+)
+
+var (
+	youStyle = lipgloss.NewStyle().
+			Bold(true).
+			Underline(true).
+			Foreground(lipgloss.Color("5"))
+
+	aiStyle = lipgloss.NewStyle().
+		Bold(true).
+		Underline(true).
+		Foreground(lipgloss.Color("202"))
+
+	youMSG = youStyle.Render("You")
+	aiMSG  = aiStyle.Render("AI")
 )
 
 func main() {
@@ -29,10 +46,13 @@ type (
 )
 
 type model struct {
-	textInput textinput.Model
-	spinner   spinner.Model
-	ai        *AI
-	err       error
+	textInput  textinput.Model
+	spinner    spinner.Model
+	requesting bool
+	renderer   *glamour.TermRenderer
+
+	ai  *AI
+	err error
 }
 
 func initialModel() model {
@@ -47,11 +67,16 @@ func initialModel() model {
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
+	renderer, _ := glamour.NewTermRenderer(glamour.WithAutoStyle())
+
 	return model{
-		spinner:   s,
-		textInput: ti,
-		ai:        newAI(),
-		err:       nil,
+		spinner:    s,
+		textInput:  ti,
+		requesting: false,
+		renderer:   renderer,
+
+		ai:  newAI(),
+		err: nil,
 	}
 }
 
@@ -65,7 +90,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case aiResponsesMsg:
-		cmds = append(cmds, tea.Printf("AI:\t%s", msg.Content))
+		out, _ := m.renderer.Render(msg.Content)
+
+		cmds = append(cmds, tea.Printf("%s\t%s", aiMSG, out))
+		m.requesting = false
 
 	case tea.KeyMsg:
 		switch msg.Type {
@@ -75,8 +103,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case tea.KeyEnter:
 			value := m.textInput.Value()
 			m.textInput.Reset()
-			cmds = append(cmds, tea.Printf("You:\t%s", value))
+			if strings.TrimSpace(value) == "" {
+				break
+			}
+			cmds = append(cmds, tea.Printf("%s\n  %s", youMSG, value))
 
+			m.requesting = true
 			cmd = func() tea.Msg {
 				res, err := m.ai.ask(value)
 				if err != nil {
@@ -105,8 +137,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	spin := "⎮ "
+	if m.requesting {
+		spin = m.spinner.View()
+	}
+
 	return fmt.Sprintf(
-		"\n%s\n\n%s",
+		"\n%s%s\n\n%s",
+		spin,
 		m.textInput.View(),
 		"(esc to quit)",
 	)
