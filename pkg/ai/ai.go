@@ -1,4 +1,4 @@
-package main
+package ai
 
 import (
 	"context"
@@ -15,7 +15,7 @@ type AI struct {
 	client   *openai.Client
 }
 
-func newAI() *AI {
+func NewAI() *AI {
 	ai := &AI{
 		messages: make([]openai.ChatCompletionMessage, 0),
 		client:   openai.NewClient(os.Getenv("OPENAI_API_KEY")),
@@ -23,7 +23,7 @@ func newAI() *AI {
 	return ai
 }
 
-func (a *AI) sendMsg(content string) (string, error) {
+func (a *AI) SendMsg(content string) (string, error) {
 	a.messages = append(a.messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: content,
