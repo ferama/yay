@@ -47,8 +47,10 @@ func NewAI() *AI {
 func (a *AI) SendMsg(content string) (string, error) {
 	content = fmt.Sprintf("%s %s", formatHeader, content)
 
-	// limit input size
-	content = content[:maxCharsGPT]
+	if len(content) > maxCharsGPT {
+		// limit input size
+		content = content[:maxCharsGPT]
+	}
 
 	a.messages = append(a.messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
