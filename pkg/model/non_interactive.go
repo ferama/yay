@@ -50,7 +50,13 @@ func (m *nonInteractiveModel) Output() string {
 	if m.err == nil {
 		ret, _ = m.renderer.Render(m.out)
 	} else {
-		ret = errorSytle.Render(fmt.Sprintf("[ERROR: %s]", m.err))
+		if m.err == ai.ErrInvalidApiKey {
+			errorMsg := "Api key is not valid. Is the 'OPENAI_API_KEY' env var set?\n"
+			errorMsg += "You can grab one at https://platform.openai.com/account/api-keys\n"
+			ret = errorMsg
+		} else {
+			ret = errorSytle.Render(fmt.Sprintf("[ERROR: %s]", m.err))
+		}
 
 	}
 	return ret

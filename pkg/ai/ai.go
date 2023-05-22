@@ -10,6 +10,13 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+var (
+	ErrInvalidApiKey = errors.New("invalid api key")
+	ErrRateLimit     = errors.New("rate limit error")
+	ErrMaxPromptSize = errors.New("maximum prompt size exceeded")
+	ErrModelNotFound = errors.New("model not found")
+)
+
 type AI struct {
 	messages []openai.ChatCompletionMessage
 	client   *openai.Client
@@ -61,15 +68,15 @@ func (a *AI) SendMsg(content string) (string, error) {
 	if errors.As(err, &ae) {
 		switch ae.HTTPStatusCode {
 		case http.StatusNotFound:
-			return "", fmt.Errorf("openai server error: model not found")
+			return "", ErrModelNotFound
 		case http.StatusBadRequest:
 			if ae.Code == "context_length_exceeded" {
-				return "", fmt.Errorf("maximum prompt size exceeded")
+				return "", ErrMaxPromptSize
 			}
 		case http.StatusUnauthorized:
-			return "", fmt.Errorf("invalid api key")
+			return "", ErrInvalidApiKey
 		case http.StatusTooManyRequests:
-			return "", fmt.Errorf("rate limit error")
+			return "", ErrRateLimit
 		case http.StatusInternalServerError:
 			resp, err = retry()
 		default:

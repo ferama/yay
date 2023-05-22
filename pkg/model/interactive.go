@@ -85,7 +85,7 @@ func (m *interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case aiResponsesMsg:
 		out, _ := m.renderer.Render(msg.Content)
 
-		cmds = append(cmds, tea.Printf("%s\t%s", aiMSG, out))
+		cmds = append(cmds, tea.Printf("%s%s", aiMSG, out))
 		m.requesting = false
 
 	case tea.WindowSizeMsg:
@@ -102,7 +102,7 @@ func (m *interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if strings.TrimSpace(value) == "" {
 				break
 			}
-			cmds = append(cmds, tea.Printf("%s\n  %s", youMSG, value))
+			cmds = append(cmds, tea.Printf("%s\n  %s\n", youMSG, value))
 
 			m.requesting = true
 			cmd = func() tea.Msg {
@@ -121,6 +121,10 @@ func (m *interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case errMsg:
 		m.requesting = false
 		m.err = msg
+		if m.err == ai.ErrInvalidApiKey {
+			m.View()
+			return m, tea.Quit
+		}
 		return m, nil
 	}
 
@@ -141,7 +145,12 @@ func (m *interactiveModel) View() string {
 
 	err := ""
 	if m.err != nil {
-		err = fmt.Sprintf("[ERROR: %s]", m.err)
+		if m.err == ai.ErrInvalidApiKey {
+			err = "\nApi key is not valid. Is the 'OPENAI_API_KEY' env var set?\n"
+			err += "You can grab one at https://platform.openai.com/account/api-keys\n\n"
+		} else {
+			err = fmt.Sprintf("[ERROR: %s]", m.err)
+		}
 	}
 
 	return fmt.Sprintf(
