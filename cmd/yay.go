@@ -61,8 +61,16 @@ func yayPipe(header string) {
 }
 
 var yayCmd = &cobra.Command{
-	Use:  "yay",
-	Args: cobra.MinimumNArgs(0),
+	Use: "yay",
+	Args: func(cmd *cobra.Command, args []string) error {
+		isInteractive, _ := cmd.Flags().GetBool("interactive")
+		if !isInteractive {
+			if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
+				return err
+			}
+		}
+		return nil
+	},
 	Example: `
   # starts yay in interactive mode
   $ yay -i
