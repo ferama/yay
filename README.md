@@ -15,7 +15,7 @@ from command line.
 
 Download yay from the release page https://github.com/ferama/yay/releases
 
-Go here and create an api key https://platform.openai.com/account/api-keys
+Go here and create an api key (for FREE) https://platform.openai.com/account/api-keys
 
 export is as env var
 
