@@ -23,24 +23,35 @@ func yayPipe(header string) {
 		panic(err)
 	}
 
+	pipedContent := true
 	if stat.Mode()&os.ModeNamedPipe == 0 && stat.Size() == 0 {
-		fmt.Println("Try piping in some text.")
-		os.Exit(1)
-	}
-	reader := &io.LimitedReader{
-		R: bufio.NewReader(os.Stdin),
-		N: 1024 * 10,
-	}
-	body, err := io.ReadAll(reader)
-	if err != nil {
-		fmt.Printf("Error while reading from pipe: %s", err.Error())
-		os.Exit(1)
+		pipedContent = false
 	}
 
 	var msg string
-	msg = string(body)
-	if header != "" {
-		msg = fmt.Sprintf("%s\n%s", header, body)
+
+	if pipedContent {
+		reader := &io.LimitedReader{
+			R: bufio.NewReader(os.Stdin),
+			N: 1024 * 10,
+		}
+		body, err := io.ReadAll(reader)
+		if err != nil {
+			fmt.Printf("Error while reading from pipe: %s", err.Error())
+			os.Exit(1)
+		}
+
+		msg = string(body)
+		if header != "" {
+			msg = fmt.Sprintf("%s\n%s", header, body)
+		}
+	} else {
+		if header != "" {
+			msg = header
+		} else {
+			fmt.Println("no piped content and no header is present")
+			os.Exit(1)
+		}
 	}
 
 	model := model.NewNonInteractiveModel(msg)

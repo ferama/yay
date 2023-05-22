@@ -24,6 +24,8 @@ func NewAI() *AI {
 }
 
 func (a *AI) SendMsg(content string) (string, error) {
+	content = fmt.Sprintf("format the response as markdown. %s", content)
+
 	a.messages = append(a.messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: content,

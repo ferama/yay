@@ -30,8 +30,7 @@ type doReqMsg struct {
 func NewNonInteractiveModel(req string) *nonInteractiveModel {
 
 	s := spinner.New()
-	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
+	s.Spinner = spinner.Points
 
 	renderer, _ := glamour.NewTermRenderer(glamour.WithAutoStyle())
 
@@ -109,8 +108,9 @@ func (m *nonInteractiveModel) View() string {
 		spin = m.spinner.View()
 	}
 
+	s := lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 	return fmt.Sprintf(
-		"\n%s",
+		s.Render("Elaborating %s"),
 		spin,
 	)
 }
