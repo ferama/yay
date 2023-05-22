@@ -32,7 +32,10 @@ func NewNonInteractiveModel(req string) *nonInteractiveModel {
 	s := spinner.New()
 	s.Spinner = spinner.Points
 
-	renderer, _ := glamour.NewTermRenderer(glamour.WithAutoStyle())
+	renderer, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithPreservedNewLines(),
+	)
 
 	return &nonInteractiveModel{
 		spinner:    s,

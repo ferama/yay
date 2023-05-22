@@ -60,7 +60,10 @@ func NewInteractiveModel() *interactiveModel {
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
-	renderer, _ := glamour.NewTermRenderer(glamour.WithAutoStyle())
+	renderer, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+		glamour.WithPreservedNewLines(),
+	)
 
 	return &interactiveModel{
 		spinner:    s,
