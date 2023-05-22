@@ -48,7 +48,7 @@ type interactiveModel struct {
 	err error
 }
 
-func NewInteractiveModel() interactiveModel {
+func NewInteractiveModel() *interactiveModel {
 
 	ti := textinput.New()
 	ti.Placeholder = "Send a msg"
@@ -62,7 +62,7 @@ func NewInteractiveModel() interactiveModel {
 
 	renderer, _ := glamour.NewTermRenderer(glamour.WithAutoStyle())
 
-	return interactiveModel{
+	return &interactiveModel{
 		spinner:    s,
 		textInput:  ti,
 		requesting: false,
@@ -73,11 +73,11 @@ func NewInteractiveModel() interactiveModel {
 	}
 }
 
-func (m interactiveModel) Init() tea.Cmd {
+func (m *interactiveModel) Init() tea.Cmd {
 	return tea.Batch(textinput.Blink, m.spinner.Tick)
 }
 
-func (m interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
@@ -133,7 +133,7 @@ func (m interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m interactiveModel) View() string {
+func (m *interactiveModel) View() string {
 	spin := "⎮ "
 	if m.requesting {
 		spin = m.spinner.View()
