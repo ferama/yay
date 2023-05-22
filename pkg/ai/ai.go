@@ -10,6 +10,20 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+const (
+	// is the model that we are actually using
+	openAIModel = openai.GPT3Dot5Turbo
+
+	// input must not exceed this size
+	maxCharsGPT = 12250
+
+	// if a request fail, how many times we should retry
+	maxRetries = 3
+
+	formatHeader = "format the response as markdown."
+)
+
+// define errors
 var (
 	ErrInvalidApiKey = errors.New("invalid api key")
 	ErrRateLimit     = errors.New("rate limit error")
@@ -31,31 +45,40 @@ func NewAI() *AI {
 }
 
 func (a *AI) SendMsg(content string) (string, error) {
-	content = fmt.Sprintf("format the response as markdown. %s", content)
+	content = fmt.Sprintf("%s %s", formatHeader, content)
+
+	// limit input size
+	content = content[:maxCharsGPT]
 
 	a.messages = append(a.messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
 		Content: content,
 	})
 
-	maxRetries := 3
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// this actually makes the call to the api
 	doreq := func() (openai.ChatCompletionResponse, error) {
 		return a.client.CreateChatCompletion(
-			context.Background(),
+			ctx,
 			openai.ChatCompletionRequest{
-				Model:    openai.GPT3Dot5Turbo,
+				Model:    openAIModel,
 				Messages: a.messages,
 			},
 		)
 	}
+
+	// retries is something went wrong
+	retries := maxRetries
 	retry := func() (openai.ChatCompletionResponse, error) {
 		for {
 			r, err := doreq()
 			if err == nil {
 				return r, err
 			}
-			maxRetries--
-			if maxRetries <= 0 {
+			retries--
+			if retries <= 0 {
 				break
 			}
 		}
@@ -64,6 +87,7 @@ func (a *AI) SendMsg(content string) (string, error) {
 
 	resp, err := doreq()
 
+	// manage errors
 	ae := &openai.APIError{}
 	if errors.As(err, &ae) {
 		switch ae.HTTPStatusCode {

@@ -14,7 +14,6 @@ import (
 
 func init() {
 	yayCmd.Flags().BoolP("interactive", "i", false, "use interactive mode")
-	yayCmd.Flags().StringP("header", "e", "", "add message header")
 }
 
 func yayPipe(header string) {
@@ -31,10 +30,7 @@ func yayPipe(header string) {
 	var msg string
 
 	if pipedContent {
-		reader := &io.LimitedReader{
-			R: bufio.NewReader(os.Stdin),
-			N: 1024 * 10,
-		}
+		reader := bufio.NewReader(os.Stdin)
 		body, err := io.ReadAll(reader)
 		if err != nil {
 			fmt.Printf("Error while reading from pipe: %s", err.Error())
@@ -57,7 +53,8 @@ func yayPipe(header string) {
 	model := model.NewNonInteractiveModel(msg)
 	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	fmt.Println(model.Output())
@@ -66,6 +63,13 @@ func yayPipe(header string) {
 var yayCmd = &cobra.Command{
 	Use:  "yay",
 	Args: cobra.MinimumNArgs(0),
+	Example: `
+  # starts yay in interactive mode
+  $ yay -i
+  
+  # pipe in input
+  $ ls ~/tmp | yay "could you order this files by type?"
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		isInteractive, _ := cmd.Flags().GetBool("interactive")
 
@@ -77,7 +81,7 @@ var yayCmd = &cobra.Command{
 			return
 		}
 
-		header, _ := cmd.Flags().GetString("header")
+		header := os.Args[1]
 		yayPipe(header)
 	},
 }
