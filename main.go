@@ -26,6 +26,9 @@ var (
 		Underline(true).
 		Foreground(lipgloss.Color("202"))
 
+	errorSytle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("9"))
+
 	youMSG = youStyle.Render("You")
 	aiMSG  = aiStyle.Render("AI")
 )
@@ -95,6 +98,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, tea.Printf("%s\t%s", aiMSG, out))
 		m.requesting = false
 
+	case tea.WindowSizeMsg:
+		m.textInput.Width = msg.Width
+
 	case tea.KeyMsg:
 		switch msg.Type {
 		case tea.KeyCtrlC, tea.KeyEsc:
@@ -123,6 +129,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// We handle errors just like any other message
 	case errMsg:
+		m.requesting = false
 		m.err = msg
 		return m, nil
 	}
@@ -142,10 +149,16 @@ func (m model) View() string {
 		spin = m.spinner.View()
 	}
 
+	err := ""
+	if m.err != nil {
+		err = fmt.Sprintf("[ERROR: %s]", m.err)
+	}
+
 	return fmt.Sprintf(
-		"\n%s%s\n%s",
+		"\n%s%s\n%s %s",
 		spin,
 		m.textInput.View(),
 		"(esc to quit)",
+		errorSytle.Render(err),
 	)
 }
