@@ -7,9 +7,9 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ferama/yay/pkg/ai"
+	"github.com/ferama/yay/pkg/renderer"
 )
 
 var (
@@ -42,7 +42,7 @@ type interactiveModel struct {
 	textInput  textinput.Model
 	spinner    spinner.Model
 	requesting bool
-	renderer   *glamour.TermRenderer
+	renderer   renderer.Renderer
 
 	ai  *ai.AI
 	err error
@@ -60,16 +60,11 @@ func NewInteractiveModel() *interactiveModel {
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("205"))
 
-	renderer, _ := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
-		glamour.WithPreservedNewLines(),
-	)
-
 	return &interactiveModel{
 		spinner:    s,
 		textInput:  ti,
 		requesting: false,
-		renderer:   renderer,
+		renderer:   renderer.NewMarkdownRenderer(),
 
 		ai:  ai.NewAI(),
 		err: nil,
@@ -86,7 +81,7 @@ func (m *interactiveModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case aiResponsesMsg:
-		out, _ := m.renderer.Render(msg.Content)
+		out := m.renderer.Render(msg.Content)
 
 		cmds = append(cmds, tea.Printf("%s%s", aiMSG, out))
 		m.requesting = false

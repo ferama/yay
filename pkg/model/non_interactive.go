@@ -5,15 +5,15 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ferama/yay/pkg/ai"
+	"github.com/ferama/yay/pkg/renderer"
 )
 
 type nonInteractiveModel struct {
 	spinner    spinner.Model
 	requesting bool
-	renderer   *glamour.TermRenderer
+	renderer   renderer.Renderer
 
 	request string
 
@@ -32,15 +32,15 @@ func NewNonInteractiveModel(req string) *nonInteractiveModel {
 	s := spinner.New()
 	s.Spinner = spinner.Points
 
-	renderer, _ := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
-		glamour.WithPreservedNewLines(),
-	)
+	// renderer, _ := glamour.NewTermRenderer(
+	// 	glamour.WithAutoStyle(),
+	// 	glamour.WithPreservedNewLines(),
+	// )
 
 	return &nonInteractiveModel{
 		spinner:    s,
 		requesting: false,
-		renderer:   renderer,
+		renderer:   renderer.NewMarkdownRenderer(),
 		request:    req,
 
 		ai:  ai.NewAI(),
@@ -51,7 +51,7 @@ func NewNonInteractiveModel(req string) *nonInteractiveModel {
 func (m *nonInteractiveModel) Output() string {
 	var ret string
 	if m.err == nil {
-		ret, _ = m.renderer.Render(m.out)
+		ret = m.renderer.Render(m.out)
 	} else {
 		if m.err == ai.ErrInvalidApiKey {
 			errorMsg := "Api key is not valid. Is the 'OPENAI_API_KEY' env var set?\n"
