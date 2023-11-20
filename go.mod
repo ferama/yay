@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v0.24.2
 	github.com/charmbracelet/glamour v0.6.0
 	github.com/charmbracelet/lipgloss v0.8.0
-	github.com/sashabaranov/go-openai v1.15.2
+	github.com/sashabaranov/go-openai v1.17.8
 	github.com/spf13/cobra v1.7.0
 )
 
