@@ -37,9 +37,25 @@ type AI struct {
 }
 
 func NewAI() *AI {
+
+	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+
+	// allow usage of local opeani comptatible servers like
+	// python-llama-cpp or vllm
+	// Example:
+	//	YAY_API_BASEURL="http://localhost:8000/v1"
+
+	customUrl := os.Getenv("YAY_API_BASEURL")
+	if customUrl != "" {
+		client = openai.NewClientWithConfig(openai.ClientConfig{
+			BaseURL:    customUrl,
+			HTTPClient: &http.Client{},
+		})
+	}
+
 	ai := &AI{
 		messages: make([]openai.ChatCompletionMessage, 0),
-		client:   openai.NewClient(os.Getenv("OPENAI_API_KEY")),
+		client:   client,
 	}
 	return ai
 }
