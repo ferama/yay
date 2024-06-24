@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/charmbracelet/bubbles v0.16.1
-	github.com/charmbracelet/bubbletea v0.26.4
+	github.com/charmbracelet/bubbletea v0.26.5
 	github.com/charmbracelet/glamour v0.7.0
 	github.com/charmbracelet/lipgloss v0.11.0
 	github.com/sashabaranov/go-openai v1.26.0
@@ -41,6 +41,6 @@ require (
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 )
