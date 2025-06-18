@@ -15,12 +15,12 @@ from command line.
 
 Download yay from the release page https://github.com/ferama/yay/releases
 
-Go here and create an api key (for FREE) https://platform.openai.com/account/api-keys
+Export needded env vars
 
-Export it as env var
-
-```
-OPENAI_API_KEY=[put your api key here]
+```sh
+YAY_MODEL=meta-llama/llama-4-maverick-17b-128e-instruct
+YAY_API_BASEURL=https://api.groq.com/openai/v1
+YAY_API_KEY=[put your api key here]
 ```
 
 Run yay!

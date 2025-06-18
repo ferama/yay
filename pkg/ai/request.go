@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/ferama/yay/pkg/ai/tools"
 	"github.com/sashabaranov/go-openai"
@@ -13,6 +14,11 @@ import (
 func doRequest(client *openai.Client, messages []openai.ChatCompletionMessage, useTools bool) (*openai.ChatCompletionResponse, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	AIModel, exists := os.LookupEnv("YAY_MODEL")
+	if !exists {
+		AIModel = openai.GPT3Dot5Turbo
+	}
 
 	t := []openai.Tool{}
 	if useTools {
@@ -26,7 +32,7 @@ func doRequest(client *openai.Client, messages []openai.ChatCompletionMessage, u
 		return client.CreateChatCompletion(
 			ctx,
 			openai.ChatCompletionRequest{
-				Model:    openAIModel,
+				Model:    AIModel,
 				Messages: messages,
 				Tools:    t,
 			},

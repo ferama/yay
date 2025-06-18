@@ -9,4 +9,5 @@ type Tool interface {
 
 var AllTools = []Tool{
 	&getTimeTool{},
+	&webSearchTool{},
 }

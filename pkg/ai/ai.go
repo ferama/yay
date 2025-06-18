@@ -10,18 +10,25 @@ import (
 )
 
 const (
-	// is the model that we are actually using
-	// openAIModel = openai.GPT3Dot5Turbo
-	openAIModel = "meta-llama/llama-4-maverick-17b-128e-instruct"
-	// openAIModel = "llama-3.3-70b-versatile"
-
 	// input must not exceed this size
 	maxCharsGPT = 12250
 
 	// if a request fail, how many times we should retry
 	maxRetries = 3
 
-	formatHeader = "format the response as markdown."
+	prompt = `Use the available tools to verify your response. Format the response as markdown. 
+	Do not list the tools in the response, just use them if needed. 
+	If you don't know the answer, say 'I don't know'.
+	If you do web searches provide the source link in the response.
+	Use an example format like this:
+	
+	Here is the answer to your question.
+
+	**Sources**
+	- [Source](https://example.com)
+	- [Another Source](https://example.com)
+
+	\n\n`
 )
 
 // define errors
@@ -39,7 +46,7 @@ type AI struct {
 
 func NewAI() *AI {
 
-	client := openai.NewClient(os.Getenv("OPENAI_API_KEY"))
+	client := openai.NewClient(os.Getenv("YAY_API_KEY"))
 
 	// allow usage of local opeani comptatible servers like
 	// python-llama-cpp or vllm
@@ -48,7 +55,7 @@ func NewAI() *AI {
 
 	customUrl := os.Getenv("YAY_API_BASEURL")
 	if customUrl != "" {
-		config := openai.DefaultConfig(os.Getenv("OPENAI_API_KEY"))
+		config := openai.DefaultConfig(os.Getenv("YAY_API_KEY"))
 		config.BaseURL = customUrl
 		client = openai.NewClientWithConfig(config)
 	}
@@ -101,7 +108,7 @@ func (a *AI) handleTools(calls []openai.ToolCall, message openai.ChatCompletionM
 }
 
 func (a *AI) SendMsg(content string) (string, error) {
-	content = fmt.Sprintf("%s %s", formatHeader, content)
+	content = fmt.Sprintf("%s %s", prompt, content)
 
 	if len(content) > maxCharsGPT {
 		// limit input size
