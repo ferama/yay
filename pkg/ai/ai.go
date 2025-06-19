@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ferama/yay/pkg/ai/tools"
 	"github.com/sashabaranov/go-openai"
@@ -16,19 +17,35 @@ const (
 	// if a request fail, how many times we should retry
 	maxRetries = 3
 
-	prompt = `Use the available tools to verify your response. Format the response as markdown. 
-	Do not list the tools in the response, just use them if needed. 
-	If you don't know the answer, say 'I don't know'.
-	If you do web searches provide the source link in the response.
-	Use an example format like this:
-	
-	Here is the answer to your question.
+	prompt = `Tou are an assistant that thinks step-by-step and uses tools to answer questions.
 
-	**Sources**
-	- [Source](https://example.com)
-	- [Another Source](https://example.com)
+When you get a question:
+1. Think about what to do using <think>.
+2. If you need a tool, call it using <tool>tool_name: input</tool>.
+3. Always show the tool calls and final answer in the output.
+4. End with <final>answer</final>
 
-	\n\n`
+Example:
+<question>What is 2 + 2?</question>
+<think>I should use a calculator.</think>
+<final>
+The answer is 4
+</final>
+
+<question>What's the latest news about LangChain?</question>
+<think>I should search the internet for this.</think>
+<final>
+[insert result here]
+</final>
+
+<question>Tell me about LangChain from Wikipedia and summarize it.</question>
+<think>I should use Wikipedia search and then summarize the info.</think>
+<final>
+[insert summarized info]
+</final>
+
+Now answer this:
+`
 )
 
 // define errors
@@ -108,7 +125,7 @@ func (a *AI) handleTools(calls []openai.ToolCall, message openai.ChatCompletionM
 }
 
 func (a *AI) SendMsg(content string) (string, error) {
-	content = fmt.Sprintf("%s %s", prompt, content)
+	content = fmt.Sprintf("%s\n<question>%s</question>", prompt, content)
 
 	if len(content) > maxCharsGPT {
 		// limit input size
@@ -126,14 +143,24 @@ func (a *AI) SendMsg(content string) (string, error) {
 		return "", fmt.Errorf("chat error: %v", err)
 	}
 
+	msg := ""
 	if len(resp.Choices[0].Message.ToolCalls) > 0 {
-		return a.handleTools(resp.Choices[0].Message.ToolCalls, resp.Choices[0].Message)
+		msg, err = a.handleTools(resp.Choices[0].Message.ToolCalls, resp.Choices[0].Message)
+		if err != nil {
+			return "", fmt.Errorf("tool handling error: %v", err)
+		}
+	} else {
+		msg = resp.Choices[0].Message.Content
+		a.messages = append(a.messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleAssistant,
+			Content: msg,
+		})
 	}
 
-	msg := resp.Choices[0].Message.Content
-	a.messages = append(a.messages, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleAssistant,
-		Content: msg,
-	})
+	msg = strings.ReplaceAll(msg, "<think>", "# Thinking\n")
+	msg = strings.ReplaceAll(msg, "</think>", "")
+	msg = strings.ReplaceAll(msg, "<final>", "# Answer\n")
+	msg = strings.ReplaceAll(msg, "</final>", "")
+
 	return msg, nil
 }

@@ -23,6 +23,7 @@ func (t *getTimeTool) Definition() openai.Tool {
 	}
 }
 func (t *getTimeTool) Handle(call openai.ToolCall) (string, error) {
+	// fmt.Println("getTimeTool Handle called with call:", call)
 	if call.Function.Name != "get_current_time" {
 		return "", nil // or an error if you want to handle unknown calls
 	}

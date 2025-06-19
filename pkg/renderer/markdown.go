@@ -1,6 +1,8 @@
 package renderer
 
-import "github.com/charmbracelet/glamour"
+import (
+	"github.com/charmbracelet/glamour"
+)
 
 type MarkdownRenderer struct {
 	renderer *glamour.TermRenderer
