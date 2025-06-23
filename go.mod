@@ -9,7 +9,9 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.5
 	github.com/charmbracelet/glamour v0.10.0
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
-	github.com/sashabaranov/go-openai v1.40.1
+	github.com/go-shiori/go-readability v0.0.0-20250217085726-9f5bf5ca7612
+	github.com/gocolly/colly v1.2.0
+	github.com/sashabaranov/go-openai v1.40.2
 	github.com/spf13/cobra v1.9.1
 )
 
@@ -32,9 +34,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-shiori/dom v0.0.0-20230515143342-73569d674e1c // indirect
-	github.com/go-shiori/go-readability v0.0.0-20250217085726-9f5bf5ca7612 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly v1.2.0 // indirect
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
