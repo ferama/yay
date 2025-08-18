@@ -11,7 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250404203927-76690c660834
 	github.com/go-shiori/go-readability v0.0.0-20250217085726-9f5bf5ca7612
 	github.com/gocolly/colly v1.2.0
-	github.com/sashabaranov/go-openai v1.40.5
+	github.com/sashabaranov/go-openai v1.41.1
 	github.com/spf13/cobra v1.9.1
 )
 
